@@ -1,52 +1,48 @@
+##2558137
+##2744075
+##2663211
 from reconchess import *
 import chess
-# def isNumber(s):
-#     return s.isdigit()
 
-# def Board(state):
-#     state_comp=state.split()
-#     if len(state_comp)!=6:
-#         return "Error: Invalid FEN structure (expected 6 components)"
-#     piece_pos=state_comp[0]
-#     rows=piece_pos.split("/")
-#     matrix=[]
-#     for row_str in rows:
-#         row_data=[]
-#         for char in row_str:
-#             if isNumber(char):
-#                 for _ in range(int(char)):
-#                     row_data.append(".")
-#             else:
-#                 row_data.append(char)
-#         matrix.append(row_data)
-        
-# #     for row in matrix:
-# #         print(" ".join(row))
-# #     return ""
-#     return matrix
+
 def board(state):
+    """Convert a FEN string into a chess.Board object."""
     return chess.Board(state)
 
-    
-def MoveExecution(state, move):
-    try:
-        board = chess.Board(state)  # load FEN
 
+def MoveExecution(state, move):
+    """
+    Apply a move to a chess position and return the resulting position.
+
+    Args:
+        state (str): The current board position as a FEN string.
+        move  (str): The move to apply in UCI format (e.g. 'e2e4', '0000' for null move).
+
+    Returns:
+        str: The new board position as a FEN string, or an error message on failure.
+    """
+    try:
+        # Load the board from the FEN string
+        board = chess.Board(state)
+
+        # Parse the UCI move string into a Move object.
+        # chess.Move.from_uci also handles the null move ('0000').
         uci_move = chess.Move.from_uci(move)
 
-        # Check if move is legal
-        if uci_move not in board.legal_moves:
-            return "Illegal move"
+        # Push the move onto the board without a strict legality check,
+        # since RBC allows pseudolegal moves (king may remain in check).
+        board.push(uci_move)
 
-        board.push(uci_move)  # execute move
-
-        return board.fen()  # return new FEN
+        # Return the updated board state as a FEN string
+        return board.fen()
 
     except Exception as e:
         return f"Error: {str(e)}"
 
 
 if __name__ == "__main__":
+    # Read the current board state and the move from stdin
     state = input().strip()
     move = input().strip()
+
     print(MoveExecution(state, move))
